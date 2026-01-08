@@ -30,7 +30,8 @@
         :loading="store.loadingState === LoadingState.LOADING"
         :error="store.error"
         :view-mode="viewMode"
-        :has-more="store.hasMore" />
+        :has-more="store.hasMore"
+        @retry="handleRetry" />
 
       <!-- Loading More Indicator -->
       <div
@@ -60,65 +61,66 @@
 </template>
 
 <script setup lang="ts">
-import { LoadingState } from "~/types";
+import type { Article } from '~/models/domain'
+import { LoadingState } from '~/types'
 
-const store = useArticlesStore();
+const store = useArticlesStore()
 
 // Reactive state
-const viewMode = ref<"grid" | "list">("grid");
-const isOffline = ref(false);
-const searchQuery = ref("");
-const headerRef = ref();
+const viewMode = ref<'grid' | 'list'>('grid')
+const isOffline = ref<boolean>(false)
+const searchQuery = ref<string>('')
+const headerRef = ref<HTMLElement | null>(null)
 
 // Load initial articles
-await store.loadArticles();
+await store.loadArticles()
 
 // Computed properties
-const filteredArticles = computed(() => {
-  if (!searchQuery.value.trim()) return store.articles;
+const filteredArticles = computed<Article[]>(() => {
+  if (!searchQuery.value.trim()) return store.articles
 
-  const query = searchQuery.value.toLowerCase().trim();
+  const query = searchQuery.value.toLowerCase().trim()
   return store.articles.filter(
-    (article) =>
+    (article: Article) =>
       article.title.toLowerCase().includes(query) ||
       article.excerpt.toLowerCase().includes(query) ||
       article.author.toLowerCase().includes(query) ||
       article.category.toLowerCase().includes(query)
-  );
-});
+  )
+})
 
 // View mode persistence
-const toggleViewMode = () => {
-  viewMode.value = viewMode.value === "grid" ? "list" : "grid";
+const toggleViewMode = (): void => {
+  viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid'
   // Persist view mode preference
   if (process.client) {
-    localStorage.setItem("articles-view-mode", viewMode.value);
+    localStorage.setItem('articles-view-mode', viewMode.value)
   }
-};
+}
 
 // Search functionality
-const toggleSearch = () => {
+const toggleSearch = (): void => {
   // Handled by HeaderBar component
-};
+}
 
-const handleSearch = (query: string) => {
-  searchQuery.value = query;
-};
+const handleSearch = (query: string): void => {
+  searchQuery.value = query
+}
 
 // Retry functionality
-const handleRetry = async () => {
-  isOffline.value = false;
-  await store.loadArticles(true);
-};
+const handleRetry = async (): Promise<void> => {
+  isOffline.value = false
+  await store.loadArticles(true)
+}
 
 // Infinite scroll with throttling
-let scrollTimeout: NodeJS.Timeout;
-const handleScroll = () => {
-  if (scrollTimeout) return;
+let scrollTimeout: NodeJS.Timeout | null = null
+const handleScroll = (): void => {
+  if (scrollTimeout) return
 
   scrollTimeout = setTimeout(() => {
-    const { scrollY, innerHeight } = window;
-    const { offsetHeight } = document.body;
+    const { scrollY, innerHeight } = window
+    const { offsetHeight } = document.body
 
     if (scrollY + innerHeight >= offsetHeight - 1000) {
       if (
@@ -126,50 +128,50 @@ const handleScroll = () => {
         store.loadingState !== LoadingState.LOADING &&
         !searchQuery.value
       ) {
-        store.loadArticles();
+        store.loadArticles()
       }
     }
 
-    scrollTimeout = null as any;
-  }, 100);
-};
+    scrollTimeout = null
+  }, 100)
+}
 
 // Network status monitoring
-const updateOnlineStatus = () => {
-  isOffline.value = !navigator.onLine;
+const updateOnlineStatus = (): void => {
+  isOffline.value = !navigator.onLine
   if (navigator.onLine && store.articles.length) {
-    store.loadArticles(true);
+    store.loadArticles(true)
   }
-};
+}
 
 // Lifecycle hooks
 onMounted(() => {
   // Restore view mode preference
   if (process.client) {
-    const savedViewMode = localStorage.getItem("articles-view-mode");
-    if (savedViewMode === "list" || savedViewMode === "grid") {
-      viewMode.value = savedViewMode;
+    const savedViewMode = localStorage.getItem('articles-view-mode')
+    if (savedViewMode === 'list' || savedViewMode === 'grid') {
+      viewMode.value = savedViewMode as 'grid' | 'list'
     }
   }
 
   // Event listeners
-  window.addEventListener("scroll", handleScroll, { passive: true });
-  window.addEventListener("online", updateOnlineStatus);
-  window.addEventListener("offline", updateOnlineStatus);
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('online', updateOnlineStatus)
+  window.addEventListener('offline', updateOnlineStatus)
 
   // Initial network status check
-  updateOnlineStatus();
-});
+  updateOnlineStatus()
+})
 
 onUnmounted(() => {
   if (scrollTimeout) {
-    clearTimeout(scrollTimeout);
+    clearTimeout(scrollTimeout)
   }
 
-  window.removeEventListener("scroll", handleScroll);
-  window.removeEventListener("online", updateOnlineStatus);
-  window.removeEventListener("offline", updateOnlineStatus);
-});
+  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('online', updateOnlineStatus)
+  window.removeEventListener('offline', updateOnlineStatus)
+})
 
 // SEO and meta
 useHead({

@@ -9,8 +9,7 @@
     <!-- Empty State -->
     <UiEmptyState 
       v-else-if="!articles?.length" 
-      title="No articles found" 
-      description="There are no articles available at the moment. Check back later for new content." 
+      @retry="$emit('retry')"
       class="py-12"
     />
     
@@ -44,6 +43,10 @@
 
 <script setup lang="ts">
 import type { Article } from '~/models/domain'
+
+defineEmits<{
+  retry: []
+}>()
 
 withDefaults(defineProps<{
   articles: Article[]

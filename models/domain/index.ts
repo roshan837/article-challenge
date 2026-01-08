@@ -9,4 +9,6 @@ export interface Article {
   tags: string[]
   category: string
   formattedDate: string
+  formattedContent: string
+  url: string
 }
