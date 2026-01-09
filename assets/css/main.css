@@ -90,15 +90,25 @@
   
   .grid-articles {
     @apply grid gap-4 sm:gap-6 justify-center;
-    grid-template-columns: repeat(auto-fit, 300px);
-    max-width: 1400px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     margin: 0 auto;
+  }
+  
+  @media (min-width: 768px) {
+    .grid-articles {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .grid-articles {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
   }
   
   .grid-articles-list {
     @apply grid gap-4 sm:gap-6 justify-center;
     grid-template-columns: min(700px, 100%);
-    margin: 0 12px;
     margin: 0 auto;
   }
   
@@ -139,6 +149,19 @@
 }
 
 @layer utilities {
+  /* Screen reader only text */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
   /* Touch-friendly tap targets */
   .tap-target {
     @apply min-h-[44px] min-w-[44px];

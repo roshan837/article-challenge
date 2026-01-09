@@ -104,7 +104,7 @@ const handleScroll = () => {
       }
     }
     
-    scrollTimeout = null as any
+    scrollTimeout = null
   }, 100)
 }
 

@@ -6,14 +6,18 @@
     @keydown.space.prevent="navigateToArticle"
     tabindex="0"
     role="button"
-    :aria-label="`Read article: ${article.title}`">
+    :aria-label="`Read article: ${article.title}`"
+    :class="{
+      'grid grid-rows-[auto_1fr] h-full': viewMode === 'grid',
+      'flex flex-col': viewMode === 'list'
+    }">
     <!-- Image Container -->
     <div
       class="relative overflow-hidden bg-gray-100"
       :class="{
-        'w-full h-80 sm:h-96 md:h-[28rem] lg:h-[32rem] rounded-t-lg':
+        'w-full h-80 sm:h-96 md:h-[28rem] lg:h-[32rem] rounded-lg':
           viewMode === 'list',
-        'w-full h-48 sm:h-56 md:h-64 lg:h-72 rounded-t-xl': viewMode === 'grid',
+        'w-full aspect-[4/3] rounded-t-xl': viewMode === 'grid',
       }">
       <img
         :src="article.imageUrl"
@@ -33,7 +37,7 @@
     </div>
 
     <!-- Content -->
-    <div class="p-3 sm:p-4">
+    <div class="p-3 sm:p-4 flex flex-col" :class="{ 'flex-1': viewMode === 'grid' }">
       <!-- Title -->
       <h2
         class="font-semibold group-hover:text-primary-600 transition-colors duration-200 text-clamp-2 leading-tight"
